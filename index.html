@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relevo Generacional | Fórum UPB</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- p5.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+</head>
+<body>
+
+  <!-- Contenedor del Canvas Generativo (Fondo) -->
+  <div id="canvas-container"></div>
+
+  <!-- Capa Editorial / Interfaz de la Presentación -->
+  <main id="presentation">
+
+    <!-- Encabezado Fijo -->
+    <header class="top-bar">
+      <span class="event-tag">CENTRO DE EVENTOS FÓRUM UPB</span>
+      <span class="talk-title">Relevo generacional: la ventaja que nadie está aprovechando</span>
+    </header>
+
+    <!-- Diapositivas / Diálogo del Guion -->
+    <div class="slides-container">
+      
+      <!-- Escena 1 -->
+      <section class="slide active" data-scene="0">
+        <span class="slide-number">01 / 04</span>
+        <h2>La Inercia de la Tradición</h2>
+        <p class="script-quote">"Las organizaciones consolidadas operan bajo estructuras rígidas, donde la experiencia acumula masa e inercia."</p>
+        <div class="grammar-note">
+          <strong>Gramática visual:</strong> Partículas de alta masa conectadas por vínculos de tensión fija. Representa estabilidad que roza el estancamiento.
+        </div>
+      </section>
+
+      <!-- Escena 2 -->
+      <section class="slide" data-scene="1">
+        <span class="slide-number">02 / 04</span>
+        <h2>La Fricción Necesaria</h2>
+        <p class="script-quote">"El ingreso de nueva energía no es una amenaza, es fricción. Un choque de velocidades que desestabiliza para transformar."</p>
+        <div class="grammar-note">
+          <strong>Gramática visual:</strong> Ingreso de vectores ligeros de alta agitación. Tensión elástica máxima en los resortes del sistema.
+        </div>
+      </section>
+
+      <!-- Escena 3 -->
+      <section class="slide" data-scene="2">
+        <span class="slide-number">03 / 04</span>
+        <h2>La Transferencia de Cargas</h2>
+        <p class="script-quote">"El relevo no consiste en sustituir, sino en transferir momento y reconfigurar la red de conocimiento."</p>
+        <div class="grammar-note">
+          <strong>Gramática visual:</strong> Reorganización dinámica de vínculos. Redistribución de la masa y relajación de fricciones.
+        </div>
+      </section>
+
+      <!-- Escena 4 -->
+      <section class="slide" data-scene="3">
+        <span class="slide-number">04 / 04</span>
+        <h2>La Ventaja Competitiva</h2>
+        <p class="script-quote">"Una estructura intergeneracional no es rígida ni caótica: es adaptable, resiliente y altamente conectada."</p>
+        <div class="grammar-note">
+          <strong>Gramática visual:</strong> Red cohesiva de alta propagación de onda. Flexibilidad colectiva ante perturbaciones.
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Pie de página con Controles -->
+    <footer class="bottom-bar">
+      <div class="controls-hint">Usa [← / →] o haz Clic para navegar</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+      </div>
+    </footer>
+
+  </main>
+
+  <script src="sketch.js"></script>
+</body>
+</html>
