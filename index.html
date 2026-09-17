@@ -4,8 +4,229 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Relevo Generacional | Fórum UPB</title>
-  <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #141414;
+      color: #f2ede4;
+    }
+
+    /* CANVAS DE FONDO */
+    #canvas-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    #canvas-container canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* LAYOUT DE PRESENTACIÓN */
+    #presentation {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 3rem 4rem;
+      pointer-events: none;
+    }
+
+    /* HEADER */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      border-bottom: 1px solid rgba(242, 237, 228, 0.12);
+      padding-bottom: 1rem;
+    }
+
+    .top-bar .logo-text {
+      font-weight: 800;
+      letter-spacing: 2px;
+      font-size: 1.1rem;
+      color: #f2ede4;
+    }
+
+    .talk-title {
+      color: rgba(242, 237, 228, 0.45);
+      font-size: 0.75rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    /* SLIDES */
+    .slides-container {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .slide {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      transform: translateY(-50%);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .slide-number {
+      display: block;
+      font-size: 0.75rem;
+      color: #c65d3b;
+      margin-bottom: 1.5rem;
+      font-family: monospace;
+      letter-spacing: 2px;
+    }
+
+    .slide-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      align-items: center;
+      gap: 4vw;
+      width: 100%;
+    }
+
+    .slide-texto {
+      max-width: 800px;
+    }
+
+    .slide-texto-centro {
+      max-width: 900px;
+    }
+
+    /* TIPOGRAFÍA */
+    .slide h1 {
+      font-size: 3.8rem;
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      margin-bottom: 1.5rem;
+      color: #f2ede4;
+    }
+
+    .slide h2 {
+      font-size: 3rem;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 1rem;
+      color: #f2ede4;
+    }
+
+    .slide h2.destacado {
+      color: #c65d3b;
+    }
+
+    .script-quote {
+      font-size: 1.75rem;
+      line-height: 1.4;
+      font-weight: 300;
+      margin-bottom: 1.2rem;
+      color: rgba(242, 237, 228, 0.85);
+    }
+
+    .script-quote.destacado {
+      color: #c65d3b;
+      font-weight: 600;
+    }
+
+    .slide .autor {
+      color: rgba(242, 237, 228, 0.4);
+      font-size: 0.95rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    /* FOOTER */
+    .bottom-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(242, 237, 228, 0.12);
+      padding-top: 1rem;
+    }
+
+    .controls-hint {
+      font-size: 0.75rem;
+      color: rgba(242, 237, 228, 0.35);
+      letter-spacing: 1px;
+    }
+
+    .progress-bar {
+      width: 200px;
+      height: 2px;
+      background: rgba(242, 237, 228, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 7.7%;
+      height: 100%;
+      background: #c65d3b;
+      transition: width 0.4s ease;
+    }
+
+    /* SELECTOR DE IDIOMA */
+    .selector-idioma {
+      position: fixed;
+      top: 24px;
+      right: 32px;
+      z-index: 10;
+      display: flex;
+      gap: 6px;
+      pointer-events: auto;
+    }
+
+    .selector-idioma button {
+      background: transparent;
+      border: 1px solid rgba(242, 237, 228, 0.25);
+      color: #f2ede4;
+      padding: 5px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      transition: 0.2s;
+    }
+
+    .selector-idioma button.activo {
+      background: #c65d3b;
+      border-color: #c65d3b;
+      color: #f2ede4;
+    }
+  </style>
 </head>
 <body>
 
@@ -19,7 +240,7 @@
   <main id="presentation">
 
     <header class="top-bar">
-      <img src="logos/upb-forum.png" alt="Fórum UPB" class="logo">
+      <span class="logo-text">FÓRUM UPB</span>
       <span class="talk-title">FUTURE LEADERS FORUM · FÓRUM UPB</span>
     </header>
 
@@ -38,9 +259,6 @@
         <div class="slide-grid">
           <div class="slide-texto">
             <p class="script-quote" data-clave="slide_02_texto"></p>
-          </div>
-          <div class="slide-imagen">
-            <img src="img/slide-02.jpg" alt="">
           </div>
         </div>
       </section>
@@ -61,9 +279,6 @@
           <div class="slide-texto">
             <h2 data-clave="slide_04_texto"></h2>
           </div>
-          <div class="slide-imagen">
-            <img src="img/slide-04.jpg" alt="">
-          </div>
         </div>
       </section>
 
@@ -74,9 +289,6 @@
           <div class="slide-texto">
             <p class="script-quote" data-clave="slide_05_texto_1"></p>
             <p class="script-quote destacado" data-clave="slide_05_texto_2"></p>
-          </div>
-          <div class="slide-imagen">
-            <img src="img/slide-05.jpg" alt="">
           </div>
         </div>
       </section>
@@ -105,9 +317,6 @@
           <div class="slide-texto">
             <p class="script-quote" data-clave="slide_08_texto_1"></p>
             <p class="script-quote destacado" data-clave="slide_08_texto_2"></p>
-          </div>
-          <div class="slide-imagen">
-            <img src="img/slide-08.jpg" alt="">
           </div>
         </div>
       </section>
@@ -147,9 +356,6 @@
             <p class="script-quote" data-clave="slide_12_texto_1"></p>
             <p class="script-quote destacado" data-clave="slide_12_texto_2"></p>
           </div>
-          <div class="slide-imagen">
-            <img src="img/slide-12.jpg" alt="">
-          </div>
         </div>
       </section>
 
@@ -160,9 +366,6 @@
           <div class="slide-texto">
             <h2 data-clave="slide_13_texto"></h2>
             <p class="autor" data-clave="slide_13_autor"></p>
-          </div>
-          <div class="slide-imagen">
-            <img src="img/slide-13.jpg" alt="">
           </div>
         </div>
       </section>
@@ -178,8 +381,294 @@
 
   </main>
 
-  <script src="idioma.js"></script>
-  <script src="navegacion.js"></script>
-  <script src="sketch.js"></script>
+  <script>
+    // DICCIONARIOS DE TEXTO INCRUSTADOS (Evita errores de CORS y fetch local)
+    const TEXTOS_DB = {
+      es: {
+        "slide_01_titulo": "RELEVO GENERACIONAL: LA VENTAJA QUE NADIE ESTÁ APROVECHANDO",
+        "slide_01_autor": "@centrodeeventosupb",
+        "slide_02_texto": "¿Un gran auditorio solo para hacer grados?",
+        "slide_03_texto_1": "Los eventos no llegaron a la Universidad.",
+        "slide_03_texto_2": "La Universidad decidió encontrarse con el mundo.",
+        "slide_04_texto": "Academia + Industria + Ciudad",
+        "slide_05_texto_1": "Los eventos nunca fueron el objetivo.",
+        "slide_05_texto_2": "El impacto, sí.",
+        "slide_06_texto_1": "Un evento trae personas.",
+        "slide_06_texto_2": "Una comunidad trae transformación.",
+        "slide_07_texto": "El talento crece a la velocidad de la confianza.",
+        "slide_08_texto_1": "La experiencia construye el camino.",
+        "slide_08_texto_2": "Las nuevas generaciones descubren nuevas rutas.",
+        "slide_09_texto_1": "Una visión.",
+        "slide_09_texto_2": "Dos generaciones.",
+        "slide_10_texto_1": "El crecimiento no ocurre cuando una generación reemplaza a otra.",
+        "slide_10_texto_2": "Ocurre cuando trabajan juntas.",
+        "slide_11_texto_1": "Los jóvenes no son el futuro.",
+        "slide_11_texto_2": "Son el presente que muchas organizaciones aún no ven.",
+        "slide_12_texto_1": "El futuro no se hereda.",
+        "slide_12_texto_2": "Se construye.",
+        "slide_13_texto": "Memorias",
+        "slide_13_autor": "@centrodeeventosupb"
+      },
+      pt: {
+        "slide_01_titulo": "RELEVO GERACIONAL: A VANTAGEM QUE NINGUÉM ESTÁ APROVEITANDO",
+        "slide_01_autor": "@centrodeeventosupb",
+        "slide_02_texto": "Um grande auditório apenas para formaturas?",
+        "slide_03_texto_1": "Os eventos não chegaram à Universidade.",
+        "slide_03_texto_2": "A Universidade decidiu se encontrar com o mundo.",
+        "slide_04_texto": "Academia + Indústria + Cidade",
+        "slide_05_texto_1": "Os eventos nunca foram o objetivo.",
+        "slide_05_texto_2": "O impacto, sim.",
+        "slide_06_texto_1": "Um evento traz pessoas.",
+        "slide_06_texto_2": "Uma comunidade traz transformação.",
+        "slide_07_texto": "O talento cresce na velocidade da confiança.",
+        "slide_08_texto_1": "A experiência constrói o caminho.",
+        "slide_08_texto_2": "As novas gerações descobrem novas rotas.",
+        "slide_09_texto_1": "Uma visão.",
+        "slide_09_texto_2": "Duas gerações.",
+        "slide_10_texto_1": "O crescimento não acontece quando uma geração substitui a outra.",
+        "slide_10_texto_2": "Acontece quando trabalham juntas.",
+        "slide_11_texto_1": "Os jovens não são o futuro.",
+        "slide_11_texto_2": "São o presente que muitas organizações ainda não veem.",
+        "slide_12_texto_1": "O futuro não se herda.",
+        "slide_12_texto_2": "Se constrói.",
+        "slide_13_texto": "Memórias",
+        "slide_13_autor": "@centrodeeventosupb"
+      }
+    };
+
+    function aplicarTextos(idioma) {
+      const textos = TEXTOS_DB[idioma] || TEXTOS_DB.es;
+      document.querySelectorAll("[data-clave]").forEach(el => {
+        const clave = el.dataset.clave;
+        if (textos[clave] !== undefined) {
+          el.textContent = textos[clave];
+        }
+      });
+      document.documentElement.lang = idioma;
+    }
+
+    // GESTIÓN DE IDIOMAS
+    document.querySelectorAll(".selector-idioma button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".selector-idioma button").forEach(b => b.classList.remove("activo"));
+        btn.classList.add("activo");
+        aplicarTextos(btn.dataset.idioma);
+      });
+    });
+
+    // SIMULACIÓN P5.JS Y NAVEGACIÓN
+    const SCENE_PARAMS = [
+      { rigidity: 0.18, restLength: 65,  damping: 0.85, agitation: 0.15 },
+      { rigidity: 0.10, restLength: 95,  damping: 0.88, agitation: 0.6 },
+      { rigidity: 0.06, restLength: 110, damping: 0.90, agitation: 1.4 },
+      { rigidity: 0.04, restLength: 130, damping: 0.92, agitation: 2.5 },
+      { rigidity: 0.12, restLength: 85,  damping: 0.95, agitation: 0.4 }
+    ];
+
+    let currentScene = 0;
+    let system;
+    let slides;
+
+    function setup() {
+      const contenedor = document.getElementById('canvas-container');
+      const canvas = createCanvas(windowWidth, windowHeight);
+      canvas.parent(contenedor);
+
+      slides = document.querySelectorAll('.slide');
+      system = new ParticleSystem(70);
+      aplicarTextos("es");
+      applyScene(currentScene);
+    }
+
+    function draw() {
+      background(20, 20, 20);
+      system.update();
+      system.display();
+    }
+
+    class ParticleSystem {
+      constructor(count) {
+        this.nodes = [];
+        this.springs = [];
+        this.k = 0.1;
+        this.restLength = 100;
+        this.damping = 0.9;
+        this.agitation = 0.5;
+
+        for (let i = 0; i < count; i++) {
+          const isYoung = i > count * 0.55;
+          const mass = isYoung ? 1 : 3.5;
+          const pos = createVector(
+            random(width * 0.35, width * 0.95),
+            random(height * 0.15, height * 0.85)
+          );
+          this.nodes.push(new Node(pos.x, pos.y, mass, isYoung));
+        }
+        this.rebuildConnections();
+      }
+
+      setParams(p) {
+        this.k = p.rigidity;
+        this.restLength = p.restLength;
+        this.damping = p.damping;
+        this.agitation = p.agitation;
+      }
+
+      rebuildConnections() {
+        this.springs = [];
+        for (let i = 0; i < this.nodes.length; i++) {
+          for (let j = i + 1; j < this.nodes.length; j++) {
+            const d = dist(
+              this.nodes[i].pos.x, this.nodes[i].pos.y,
+              this.nodes[j].pos.x, this.nodes[j].pos.y
+            );
+            if (d < 170) {
+              this.springs.push(new Spring(this.nodes[i], this.nodes[j]));
+            }
+          }
+        }
+      }
+
+      update() {
+        for (const node of this.nodes) {
+          const rf = p5.Vector.random2D().mult(
+            this.agitation * (node.isYoung ? 1.6 : 0.4)
+          );
+          node.applyForce(rf);
+
+          const center = createVector(width * 0.68, height * 0.5);
+          const cf = p5.Vector.sub(center, node.pos).mult(0.0002);
+          node.applyForce(cf);
+        }
+
+        for (const spring of this.springs) {
+          spring.update(this.k, this.restLength);
+        }
+
+        for (const node of this.nodes) {
+          node.update(this.damping);
+        }
+      }
+
+      display() {
+        for (const spring of this.springs) spring.display();
+        for (const node of this.nodes) node.display();
+      }
+    }
+
+    class Node {
+      constructor(x, y, mass, isYoung) {
+        this.pos = createVector(x, y);
+        this.vel = createVector(0, 0);
+        this.acc = createVector(0, 0);
+        this.mass = mass;
+        this.isYoung = isYoung;
+      }
+
+      applyForce(force) {
+        const f = p5.Vector.div(force, this.mass);
+        this.acc.add(f);
+      }
+
+      update(damping) {
+        this.vel.add(this.acc);
+        this.vel.mult(damping);
+        this.pos.add(this.vel);
+        this.acc.mult(0);
+
+        this.pos.x = constrain(this.pos.x, width * 0.28, width - 60);
+        this.pos.y = constrain(this.pos.y, 60, height - 60);
+      }
+
+      display() {
+        noStroke();
+        if (this.isYoung) {
+          fill(0, 230, 200, 220);
+          ellipse(this.pos.x, this.pos.y, 7, 7);
+        } else {
+          fill(198, 93, 59, 200);
+          ellipse(this.pos.x, this.pos.y, 15, 15);
+        }
+      }
+    }
+
+    class Spring {
+      constructor(nodeA, nodeB) {
+        this.a = nodeA;
+        this.b = nodeB;
+      }
+
+      update(k, restLength) {
+        const force = p5.Vector.sub(this.b.pos, this.a.pos);
+        const currentLength = force.mag();
+        const delta = currentLength - restLength;
+        force.normalize();
+        force.mult(k * delta);
+
+        this.a.applyForce(force);
+        this.b.applyForce(force.mult(-1));
+      }
+
+      display() {
+        const d = p5.Vector.dist(this.a.pos, this.b.pos);
+        const alpha = map(d, 20, 220, 140, 12, true);
+        strokeWeight(map(d, 20, 180, 1.6, 0.4, true));
+        stroke(242, 237, 228, alpha);
+        line(this.a.pos.x, this.a.pos.y, this.b.pos.x, this.b.pos.y);
+      }
+    }
+
+    function applyScene(index) {
+      slides.forEach((slide, i) => {
+        if (i === index) slide.classList.add('active');
+        else slide.classList.remove('active');
+      });
+
+      const progress = document.getElementById('progress');
+      if (progress) {
+        progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+      }
+
+      const sceneAttr = slides[index].getAttribute('data-scene');
+      const sceneIndex = sceneAttr ? parseInt(sceneAttr, 10) : 0;
+
+      if (system) {
+        system.setParams(SCENE_PARAMS[sceneIndex]);
+        system.rebuildConnections();
+      }
+    }
+
+    function nextSlide() {
+      currentScene = (currentScene + 1) % slides.length;
+      applyScene(currentScene);
+    }
+
+    function prevSlide() {
+      currentScene = (currentScene - 1 + slides.length) % slides.length;
+      applyScene(currentScene);
+    }
+
+    function keyPressed() {
+      if (keyCode === RIGHT_ARROW || keyCode === 32) {
+        nextSlide();
+        return false;
+      }
+      if (keyCode === LEFT_ARROW) {
+        prevSlide();
+        return false;
+      }
+      if (key === 'f' || key === 'F') {
+        fullscreen(!fullscreen());
+      }
+    }
+
+    function mousePressed() {
+      nextSlide();
+    }
+
+    function windowResized() {
+      resizeCanvas(windowWidth, windowHeight);
+    }
+  </script>
 </body>
 </html>
