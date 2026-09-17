@@ -5,71 +5,172 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Relevo Generacional | Fórum UPB</title>
   <link rel="stylesheet" href="style.css">
-  <!-- p5.js CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
 </head>
 <body>
 
-  <!-- Contenedor del Canvas Generativo (Fondo) -->
   <div id="canvas-container"></div>
 
-  <!-- Capa Editorial / Interfaz de la Presentación -->
+  <div class="selector-idioma">
+    <button data-idioma="es" class="activo">ES</button>
+    <button data-idioma="pt">PT</button>
+  </div>
+
   <main id="presentation">
 
-    <!-- Encabezado Fijo -->
     <header class="top-bar">
-      <span class="event-tag">CENTRO DE EVENTOS FÓRUM UPB</span>
-      <span class="talk-title">Relevo generacional: la ventaja que nadie está aprovechando</span>
+      <img src="logos/upb-forum.png" alt="Fórum UPB" class="logo">
+      <span class="talk-title">FUTURE LEADERS FORUM · FÓRUM UPB</span>
     </header>
 
-    <!-- Diapositivas / Diálogo del Guion -->
     <div class="slides-container">
-      
-      <!-- Escena 1 -->
+
+      <!-- 01 -->
       <section class="slide active" data-scene="0">
-        <span class="slide-number">01 / 04</span>
-        <h2>La Inercia de la Tradición</h2>
-        <p class="script-quote">"Las organizaciones consolidadas operan bajo estructuras rígidas, donde la experiencia acumula masa e inercia."</p>
-        <div class="grammar-note">
-          <strong>Gramática visual:</strong> Partículas de alta masa conectadas por vínculos de tensión fija. Representa estabilidad que roza el estancamiento.
+        <span class="slide-number">01 / 13</span>
+        <h1 data-clave="slide_01_titulo"></h1>
+        <p class="autor" data-clave="slide_01_autor"></p>
+      </section>
+
+      <!-- 02 -->
+      <section class="slide" data-scene="0">
+        <span class="slide-number">02 / 13</span>
+        <div class="slide-grid">
+          <div class="slide-texto">
+            <p class="script-quote" data-clave="slide_02_texto"></p>
+          </div>
+          <div class="slide-imagen">
+            <img src="img/slide-02.jpg" alt="">
+          </div>
         </div>
       </section>
 
-      <!-- Escena 2 -->
+      <!-- 03 -->
       <section class="slide" data-scene="1">
-        <span class="slide-number">02 / 04</span>
-        <h2>La Fricción Necesaria</h2>
-        <p class="script-quote">"El ingreso de nueva energía no es una amenaza, es fricción. Un choque de velocidades que desestabiliza para transformar."</p>
-        <div class="grammar-note">
-          <strong>Gramática visual:</strong> Ingreso de vectores ligeros de alta agitación. Tensión elástica máxima en los resortes del sistema.
+        <span class="slide-number">03 / 13</span>
+        <div class="slide-texto-centro">
+          <p class="script-quote" data-clave="slide_03_texto_1"></p>
+          <p class="script-quote destacado" data-clave="slide_03_texto_2"></p>
         </div>
       </section>
 
-      <!-- Escena 3 -->
+      <!-- 04 -->
+      <section class="slide" data-scene="1">
+        <span class="slide-number">04 / 13</span>
+        <div class="slide-grid">
+          <div class="slide-texto">
+            <h2 data-clave="slide_04_texto"></h2>
+          </div>
+          <div class="slide-imagen">
+            <img src="img/slide-04.jpg" alt="">
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 -->
       <section class="slide" data-scene="2">
-        <span class="slide-number">03 / 04</span>
-        <h2>La Transferencia de Cargas</h2>
-        <p class="script-quote">"El relevo no consiste en sustituir, sino en transferir momento y reconfigurar la red de conocimiento."</p>
-        <div class="grammar-note">
-          <strong>Gramática visual:</strong> Reorganización dinámica de vínculos. Redistribución de la masa y relajación de fricciones.
+        <span class="slide-number">05 / 13</span>
+        <div class="slide-grid">
+          <div class="slide-texto">
+            <p class="script-quote" data-clave="slide_05_texto_1"></p>
+            <p class="script-quote destacado" data-clave="slide_05_texto_2"></p>
+          </div>
+          <div class="slide-imagen">
+            <img src="img/slide-05.jpg" alt="">
+          </div>
         </div>
       </section>
 
-      <!-- Escena 4 -->
+      <!-- 06 -->
+      <section class="slide" data-scene="2">
+        <span class="slide-number">06 / 13</span>
+        <div class="slide-texto-centro">
+          <p class="script-quote" data-clave="slide_06_texto_1"></p>
+          <p class="script-quote destacado" data-clave="slide_06_texto_2"></p>
+        </div>
+      </section>
+
+      <!-- 07 -->
       <section class="slide" data-scene="3">
-        <span class="slide-number">04 / 04</span>
-        <h2>La Ventaja Competitiva</h2>
-        <p class="script-quote">"Una estructura intergeneracional no es rígida ni caótica: es adaptable, resiliente y altamente conectada."</p>
-        <div class="grammar-note">
-          <strong>Gramática visual:</strong> Red cohesiva de alta propagación de onda. Flexibilidad colectiva ante perturbaciones.
+        <span class="slide-number">07 / 13</span>
+        <div class="slide-texto-centro">
+          <h2 data-clave="slide_07_texto"></h2>
+        </div>
+      </section>
+
+      <!-- 08 -->
+      <section class="slide" data-scene="3">
+        <span class="slide-number">08 / 13</span>
+        <div class="slide-grid">
+          <div class="slide-texto">
+            <p class="script-quote" data-clave="slide_08_texto_1"></p>
+            <p class="script-quote destacado" data-clave="slide_08_texto_2"></p>
+          </div>
+          <div class="slide-imagen">
+            <img src="img/slide-08.jpg" alt="">
+          </div>
+        </div>
+      </section>
+
+      <!-- 09 -->
+      <section class="slide" data-scene="3">
+        <span class="slide-number">09 / 13</span>
+        <div class="slide-texto-centro">
+          <h2 data-clave="slide_09_texto_1"></h2>
+          <h2 class="destacado" data-clave="slide_09_texto_2"></h2>
+        </div>
+      </section>
+
+      <!-- 10 -->
+      <section class="slide" data-scene="3">
+        <span class="slide-number">10 / 13</span>
+        <div class="slide-texto-centro">
+          <p class="script-quote" data-clave="slide_10_texto_1"></p>
+          <p class="script-quote destacado" data-clave="slide_10_texto_2"></p>
+        </div>
+      </section>
+
+      <!-- 11 -->
+      <section class="slide" data-scene="4">
+        <span class="slide-number">11 / 13</span>
+        <div class="slide-texto-centro">
+          <p class="script-quote" data-clave="slide_11_texto_1"></p>
+          <p class="script-quote destacado" data-clave="slide_11_texto_2"></p>
+        </div>
+      </section>
+
+      <!-- 12 -->
+      <section class="slide" data-scene="4">
+        <span class="slide-number">12 / 13</span>
+        <div class="slide-grid">
+          <div class="slide-texto">
+            <p class="script-quote" data-clave="slide_12_texto_1"></p>
+            <p class="script-quote destacado" data-clave="slide_12_texto_2"></p>
+          </div>
+          <div class="slide-imagen">
+            <img src="img/slide-12.jpg" alt="">
+          </div>
+        </div>
+      </section>
+
+      <!-- 13 -->
+      <section class="slide" data-scene="4">
+        <span class="slide-number">13 / 13</span>
+        <div class="slide-grid">
+          <div class="slide-texto">
+            <h2 data-clave="slide_13_texto"></h2>
+            <p class="autor" data-clave="slide_13_autor"></p>
+          </div>
+          <div class="slide-imagen">
+            <img src="img/slide-13.jpg" alt="">
+          </div>
         </div>
       </section>
 
     </div>
-
-    <!-- Pie de página con Controles -->
+    
     <footer class="bottom-bar">
-      <div class="controls-hint">Usa [← / →] o haz Clic para navegar</div>
+      <div class="controls-hint">← → para navegar · [F] pantalla completa</div>
       <div class="progress-bar">
         <div class="progress-fill" id="progress"></div>
       </div>
@@ -77,6 +178,8 @@
 
   </main>
 
+  <script src="js/idioma.js"></script>
+  <script src="js/navegacion.js"></script>
   <script src="sketch.js"></script>
 </body>
 </html>

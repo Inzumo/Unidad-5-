@@ -1,9 +1,19 @@
-// --- PARÁMETROS DE LAS ESCENAS FÍSICAS ---
+// ============================================================
+// RELEVO — sistema de partículas con topología variable
+// 5 estados narrativos alineados con el guion
+// ============================================================
+
 const SCENE_PARAMS = [
-  { rigidity: 0.15, restLength: 70,  damping: 0.85, agitation: 0.2 }, // Status Quo: Rígido
-  { rigidity: 0.04, restLength: 130, damping: 0.92, agitation: 2.5 }, // Fricción: Inestable
-  { rigidity: 0.08, restLength: 95,  damping: 0.90, agitation: 0.8 }, // Transferencia: Reorganización
-  { rigidity: 0.12, restLength: 85,  damping: 0.95, agitation: 0.4 }  // Ventaja: Cohesión adaptable
+  // 0 — Rígido: Slides 1–2 (inercia de la tradición)
+  { rigidity: 0.18, restLength: 65,  damping: 0.85, agitation: 0.15 },
+  // 1 — Fluido: Slides 3–4 (la universidad se abre al mundo)
+  { rigidity: 0.10, restLength: 95,  damping: 0.88, agitation: 0.6 },
+  // 2 — Impacto / comunidad: Slides 5–6
+  { rigidity: 0.06, restLength: 110, damping: 0.90, agitation: 1.4 },
+  // 3 — Fricción / transferencia: Slides 7–10
+  { rigidity: 0.04, restLength: 130, damping: 0.92, agitation: 2.5 },
+  // 4 — Adaptable / cohesión: Slides 11–13
+  { rigidity: 0.12, restLength: 85,  damping: 0.95, agitation: 0.4 }
 ];
 
 let currentScene = 0;
@@ -11,21 +21,22 @@ let system;
 let slides;
 
 function setup() {
-  let canvas = createCanvas(windowWidth, windowHeight);
-  canvas.parent('canvas-container');
-  
+  const contenedor = document.getElementById('canvas-container');
+  const canvas = createCanvas(windowWidth, windowHeight);
+  canvas.parent(contenedor);
+
   slides = document.querySelectorAll('.slide');
-  system = new ParticleSystem(60);
+  system = new ParticleSystem(70);
   applyScene(currentScene);
 }
 
 function draw() {
-  background(11, 13, 18);
+  background(20, 20, 20);
   system.update();
   system.display();
 }
 
-// --- CLASES DEL SISTEMA DE PARTÍCULAS ---
+// ---------- SISTEMA ----------
 class ParticleSystem {
   constructor(count) {
     this.nodes = [];
@@ -36,12 +47,11 @@ class ParticleSystem {
     this.agitation = 0.5;
 
     for (let i = 0; i < count; i++) {
-      let isYoung = i > count * 0.55;
-      let mass = isYoung ? 1 : 3.5;
-      // Posiciona más partículas a la derecha para dejar espacio al texto HTML
-      let pos = createVector(
-        random(width * 0.4, width * 0.9),
-        random(height * 0.2, height * 0.8)
+      const isYoung = i > count * 0.55;
+      const mass = isYoung ? 1 : 3.5;
+      const pos = createVector(
+        random(width * 0.35, width * 0.95),
+        random(height * 0.15, height * 0.85)
       );
       this.nodes.push(new Node(pos.x, pos.y, mass, isYoung));
     }
@@ -59,7 +69,10 @@ class ParticleSystem {
     this.springs = [];
     for (let i = 0; i < this.nodes.length; i++) {
       for (let j = i + 1; j < this.nodes.length; j++) {
-        let d = dist(this.nodes[i].pos.x, this.nodes[i].pos.y, this.nodes[j].pos.x, this.nodes[j].pos.y);
+        const d = dist(
+          this.nodes[i].pos.x, this.nodes[i].pos.y,
+          this.nodes[j].pos.x, this.nodes[j].pos.y
+        );
         if (d < 170) {
           this.springs.push(new Spring(this.nodes[i], this.nodes[j]));
         }
@@ -68,31 +81,34 @@ class ParticleSystem {
   }
 
   update() {
-    for (let node of this.nodes) {
-      let randomForce = p5.Vector.random2D().mult(this.agitation * (node.isYoung ? 1.6 : 0.4));
-      node.applyForce(randomForce);
+    for (const node of this.nodes) {
+      const rf = p5.Vector.random2D().mult(
+        this.agitation * (node.isYoung ? 1.6 : 0.4)
+      );
+      node.applyForce(rf);
 
-      // Mantiene el centro de gravedad a la derecha
-      let center = createVector(width * 0.65, height * 0.5);
-      let centerForce = p5.Vector.sub(center, node.pos).mult(0.0002);
-      node.applyForce(centerForce);
+      // Fuerza suave hacia el centro del sistema
+      const center = createVector(width * 0.68, height * 0.5);
+      const cf = p5.Vector.sub(center, node.pos).mult(0.0002);
+      node.applyForce(cf);
     }
 
-    for (let spring of this.springs) {
+    for (const spring of this.springs) {
       spring.update(this.k, this.restLength);
     }
 
-    for (let node of this.nodes) {
+    for (const node of this.nodes) {
       node.update(this.damping);
     }
   }
 
   display() {
-    for (let spring of this.springs) spring.display();
-    for (let node of this.nodes) node.display();
+    for (const spring of this.springs) spring.display();
+    for (const node of this.nodes) node.display();
   }
 }
 
+// ---------- NODO ----------
 class Node {
   constructor(x, y, mass, isYoung) {
     this.pos = createVector(x, y);
@@ -103,7 +119,7 @@ class Node {
   }
 
   applyForce(force) {
-    let f = p5.Vector.div(force, this.mass);
+    const f = p5.Vector.div(force, this.mass);
     this.acc.add(f);
   }
 
@@ -113,22 +129,23 @@ class Node {
     this.pos.add(this.vel);
     this.acc.mult(0);
 
-    this.pos.x = constrain(this.pos.x, width * 0.3, width - 60);
+    this.pos.x = constrain(this.pos.x, width * 0.28, width - 60);
     this.pos.y = constrain(this.pos.y, 60, height - 60);
   }
 
   display() {
     noStroke();
     if (this.isYoung) {
-      fill(0, 230, 200, 230);
-      ellipse(this.pos.x, this.pos.y, 8, 8);
+      fill(0, 230, 200, 220);
+      ellipse(this.pos.x, this.pos.y, 7, 7);
     } else {
-      fill(245, 100, 70, 210);
-      ellipse(this.pos.x, this.pos.y, 16, 16);
+      fill(198, 93, 59, 200);
+      ellipse(this.pos.x, this.pos.y, 15, 15);
     }
   }
 }
 
+// ---------- RESORTE ----------
 class Spring {
   constructor(nodeA, nodeB) {
     this.a = nodeA;
@@ -136,9 +153,9 @@ class Spring {
   }
 
   update(k, restLength) {
-    let force = p5.Vector.sub(this.b.pos, this.a.pos);
-    let currentLength = force.mag();
-    let delta = currentLength - restLength;
+    const force = p5.Vector.sub(this.b.pos, this.a.pos);
+    const currentLength = force.mag();
+    const delta = currentLength - restLength;
     force.normalize();
     force.mult(k * delta);
 
@@ -147,27 +164,31 @@ class Spring {
   }
 
   display() {
-    let d = p5.Vector.dist(this.a.pos, this.b.pos);
-    let alpha = map(d, 20, 220, 160, 15, true);
-    strokeWeight(map(d, 20, 180, 2, 0.5, true));
-    stroke(255, 255, 255, alpha);
+    const d = p5.Vector.dist(this.a.pos, this.b.pos);
+    const alpha = map(d, 20, 220, 140, 12, true);
+    strokeWeight(map(d, 20, 180, 1.6, 0.4, true));
+    stroke(242, 237, 228, alpha);
     line(this.a.pos.x, this.a.pos.y, this.b.pos.x, this.b.pos.y);
   }
 }
 
-// --- NAVEGACIÓN Y SINCRONIZACIÓN ---
+// ---------- NAVEGACIÓN ----------
 function applyScene(index) {
-  // Sincroniza HTML
   slides.forEach((slide, i) => {
     if (i === index) slide.classList.add('active');
     else slide.classList.remove('active');
   });
 
-  document.getElementById('progress').style.width = `${((index + 1) / slides.length) * 100}%`;
+  const progress = document.getElementById('progress');
+  if (progress) {
+    progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+  }
 
-  // Sincroniza Parámetros Físicos
+  const sceneAttr = slides[index].getAttribute('data-scene');
+  const sceneIndex = sceneAttr ? parseInt(sceneAttr, 10) : 0;
+
   if (system) {
-    system.setParams(SCENE_PARAMS[index]);
+    system.setParams(SCENE_PARAMS[sceneIndex]);
     system.rebuildConnections();
   }
 }
@@ -183,8 +204,17 @@ function prevSlide() {
 }
 
 function keyPressed() {
-  if (keyCode === RIGHT_ARROW || keyCode === 32) nextSlide();
-  if (keyCode === LEFT_ARROW) prevSlide();
+  if (keyCode === RIGHT_ARROW || keyCode === 32) {
+    nextSlide();
+    return false;
+  }
+  if (keyCode === LEFT_ARROW) {
+    prevSlide();
+    return false;
+  }
+  if (key === 'f' || key === 'F') {
+    fullscreen(!fullscreen());
+  }
 }
 
 function mousePressed() {
