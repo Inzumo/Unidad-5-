@@ -123,6 +123,11 @@ body, html {
   transition: opacity 0.6s ease;
 }
 
+/* Oculta imágenes rotas para evitar que deformen el layout */
+img:not([src]), img[src=""] {
+  display: none;
+}
+
 .slide.active .slide-imagen img {
   opacity: 0.88;
 }
