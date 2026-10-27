@@ -8,8 +8,8 @@
 
 <style>
 :root {
-  --bg: #0f0f10;
-  --bg-soft: #17171a;
+  --bg: #04050b;
+  --bg-soft: #0a0c18;
   --text: #f4efe6;
   --text-dim: rgba(244, 239, 230, 0.55);
   --accent: #d97742;
@@ -291,6 +291,40 @@ h2.frase.destacado,
 .selector-idioma button:hover:not(.activo) {
   border-color: rgba(244, 239, 230, 0.4);
 }
+.slide [data-clave] { text-shadow: 0 0 18px rgba(3,4,10,0.95), 0 0 44px rgba(3,4,10,0.8); }
+@keyframes inBlur { from { opacity: 0; filter: blur(16px); } to { opacity: 1; filter: blur(0); } }
+@keyframes inLeft { from { opacity: 0; transform: translateX(-70px); } to { opacity: 1; transform: none; } }
+@keyframes inRight { from { opacity: 0; transform: translateX(70px); } to { opacity: 1; transform: none; } }
+@keyframes inRise { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: none; } }
+@keyframes inZoom { from { opacity: 0; transform: scale(0.86); } to { opacity: 1; transform: none; } }
+@keyframes inSpread { from { opacity: 0; letter-spacing: 0.35em; } to { opacity: 1; } }
+.slide.active [data-clave] { animation-duration: 1s; animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); animation-fill-mode: both; }
+.slide.active [data-clave] ~ [data-clave] { animation-delay: 0.45s; }
+body[data-s="1"] .slide.active [data-clave],
+body[data-s="7"] .slide.active [data-clave],
+body[data-s="13"] .slide.active [data-clave] { animation-name: inBlur; }
+body[data-s="3"] .slide.active [data-clave],
+body[data-s="8"] .slide.active [data-clave] { animation-name: inLeft; }
+body[data-s="6"] .slide.active [data-clave],
+body[data-s="11"] .slide.active [data-clave] { animation-name: inRight; }
+body[data-s="4"] .slide.active [data-clave],
+body[data-s="10"] .slide.active [data-clave],
+body[data-s="12"] .slide.active [data-clave] { animation-name: inRise; }
+body[data-s="2"] .slide.active [data-clave],
+body[data-s="5"] .slide.active [data-clave] { animation-name: inZoom; }
+body[data-s="9"] .slide.active [data-clave] { animation-name: inSpread; }
+body[data-s="3"] .slide.active, body[data-s="8"] .slide.active { padding-left: 5vw; }
+body[data-s="6"] .slide.active, body[data-s="11"] .slide.active { padding-left: 10vw; }
+body[data-s="9"] .slide.active { padding-left: 8vw; }
+.hud {
+  position: fixed; left: 3.5rem; bottom: 4.8rem; z-index: 2; pointer-events: none;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.72rem; letter-spacing: 0.14em; color: var(--text-dim);
+}
+.hud::before {
+  content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 0.8rem;
+  border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent);
+}
 </style>
 </head>
 <body>
@@ -301,6 +335,8 @@ h2.frase.destacado,
   <button data-idioma="es" class="activo">ES</button>
   <button data-idioma="pt">PT</button>
 </div>
+
+<div class="hud" id="hud" data-clave="hud_01"></div>
 
 <main id="presentation">
 
@@ -495,7 +531,20 @@ const TEXTOS_DB = {
     slide_12_texto_1: "El futuro no se hereda.",
     slide_12_texto_2: "Se construye.",
     slide_13_texto: "Memorias",
-    slide_13_autor: "@centrodeeventosupb"
+    slide_13_autor: "@centrodeeventosupb",
+    hud_01: "Constelación fija",
+    hud_02: "Cielo vacío",
+    hud_03: "Universo en expansión",
+    hud_04: "Tres sistemas estelares",
+    hud_05: "Supernova",
+    hud_06: "Gravedad: nace una galaxia",
+    hud_07: "Órbitas de confianza",
+    hud_08: "Ruta y cometas",
+    hud_09: "Sistema solar: una visión",
+    hud_10: "Una estrella se apaga, otra órbita se comparte",
+    hud_11: "Rotación galáctica",
+    hud_12: "Constelación construida",
+    hud_13: "Larga exposición"
   },
   pt: {
     slide_01_titulo: "Revezamento geracional: a vantagem que ninguém está aproveitando.",
@@ -520,7 +569,20 @@ const TEXTOS_DB = {
     slide_12_texto_1: "O futuro não se herda.",
     slide_12_texto_2: "Se constrói.",
     slide_13_texto: "Memórias",
-    slide_13_autor: "@centrodeeventosupb"
+    slide_13_autor: "@centrodeeventosupb",
+    hud_01: "Constelação fixa",
+    hud_02: "Céu vazio",
+    hud_03: "Universo em expansão",
+    hud_04: "Três sistemas estelares",
+    hud_05: "Supernova",
+    hud_06: "Gravidade: nasce uma galáxia",
+    hud_07: "Órbitas de confiança",
+    hud_08: "Rota e cometas",
+    hud_09: "Sistema solar: uma visão",
+    hud_10: "Uma estrela se apaga, outra órbita se compartilha",
+    hud_11: "Rotação galáctica",
+    hud_12: "Constelação construída",
+    hud_13: "Longa exposição"
   }
 };
 
@@ -545,199 +607,635 @@ document.querySelectorAll(".selector-idioma button").forEach(btn => {
   });
 });
 
-/* ============ SISTEMA DE PARTÍCULAS (p5.js) ============ */
-const SCENE_PARAMS = [
-  { rigidity: 0.20, restLength: 60,  damping: 0.85, agitation: 0.10 },  // 0 rígido
-  { rigidity: 0.12, restLength: 90,  damping: 0.88, agitation: 0.5  },  // 1 fluido
-  { rigidity: 0.07, restLength: 115, damping: 0.90, agitation: 1.3  },  // 2 impacto
-  { rigidity: 0.04, restLength: 140, damping: 0.92, agitation: 2.4  },  // 3 fricción
-  { rigidity: 0.14, restLength: 80,  damping: 0.95, agitation: 0.35 }   // 4 adaptable
+/* ============ SISTEMA DE PARTÍCULAS (p5.js) ============
+   Una escena por diapositiva (13). Cada escena = parámetros base + fases en el tiempo.
+   Los parámetros numéricos se interpolan solos, así que las transiciones fluyen.
+   Tema: el espacio. Viejos = estrellas pesadas (naranja). Jóvenes = cometas livianos (crema). */
+const ORANGE = [217, 119, 66];
+const CREAM  = [244, 239, 230];
+const EMBER  = [236, 176, 128];   // color compartido cuando las generaciones se funden
+const TAU = Math.PI * 2;
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MOTION = REDUCED ? 0.3 : 1;
+const N_NODES = 76, N_OLD = 34, TRAIL_MAX = 44;
+
+const DEFAULTS = {
+  k: 0.03, rest: 90, damp: 0.9, link: 130, lv: 1,       // resortes y enlaces visibles
+  agit: 0.5, oldAg: 0.4, youngAg: 1.6,                  // agitación aleatoria
+  pull: 0.02, cpull: 0.00018,                           // atracción a formación / al centro
+  oldA: 210, youngA: 190, oldS: 13, youngS: 6,          // opacidad y tamaño por generación
+  R: 100, gap: 0, flow: 0, mix: 0,                      // radio, apertura, campo común, fusión de color
+  form: '', fx: ''
+};
+const NUM_KEYS = ['k','rest','damp','link','lv','agit','oldAg','youngAg','pull','cpull',
+                  'oldA','youngA','oldS','youngS','R','gap','flow','mix'];
+
+const RIGID = { form: 'grid', pull: 0.02, k: 0.02, rest: 80, damp: 0.85, agit: 0.12,
+                oldAg: 0.5, youngAg: 1, link: 110, youngA: 70, youngS: 5 };
+const UNITY = { mix: 0.55, oldS: 10, youngS: 10, oldA: 200, youngA: 200, oldAg: 1, youngAg: 1 };
+
+const SCENES = [
+  // 01 — Inercia: los viejos son una cuadrícula rígida; los jóvenes orbitan afuera
+  { base: RIGID, phases: [] },
+  // 02 — "¿Un gran auditorio solo para grados?": butacas llenas, jóvenes casi invisibles
+  { base: { ...RIGID, youngA: 25, youngS: 4, oldA: 225 }, phases: [] },
+  // 03 — La Universidad se abre: la cuadrícula se parte y los jóvenes entran por la puerta
+  { base: { ...RIGID, form: 'open', pull: 0.025, damp: 0.88, agit: 0.2, youngAg: 1, youngA: 210, youngS: 6 },
+    phases: [{ at: 0.6, gap: 1 }] },
+  // 04 — Academia + Industria + Ciudad: tres núcleos conectados
+  { base: { form: 'triad', fx: 'triad', R: 70, pull: 0.025, k: 0.05, rest: 50, link: 95,
+            agit: 0.3, youngAg: 1 }, phases: [] },
+  // 05 — "El impacto": ondas que golpean a las partículas
+  { base: { fx: 'pulse', pull: 0, cpull: 0.0004, k: 0.02, rest: 100, damp: 0.93, agit: 0.6,
+            youngAg: 1.5, link: 120, youngA: 200 }, phases: [] },
+  // 06 — Personas dispersas que se vuelven comunidad (la red se teje sola)
+  { base: { cpull: 0.0006, k: 0, link: 70, lv: 0.6, agit: 1.2, damp: 0.92, pull: 0 },
+    phases: [{ at: 2.2, k: 0.05, rest: 70, link: 190, cpull: 0.0012, agit: 0.5, lv: 1 }] },
+  // 07 — Confianza: cada joven se acerca a un mentor y crece
+  { base: { form: 'mentor', fx: 'mentor', R: 150, pull: 0.012, k: 0, link: 90, lv: 0.35, agit: 0.3,
+            oldAg: 0.5, youngAg: 1.2, cpull: 0.0003, youngA: 150, youngS: 5 },
+    phases: [{ at: 2, R: 90, youngS: 7, youngA: 200 }, { at: 5, R: 42, youngS: 10, youngA: 240 }] },
+  // 08 — La experiencia traza el camino; los jóvenes exploran rutas nuevas (dejan estela)
+  { base: { form: 'path', fx: 'path trails', pull: 0.03, k: 0, link: 80, lv: 0.3, agit: 0.35,
+            oldAg: 0.15, youngAg: 2.4, cpull: 0.0003, damp: 0.94 }, phases: [] },
+  // 09 — Una visión, dos generaciones: mismo centro, dos órbitas
+  { base: { form: 'orbit', fx: 'vision', pull: 0.04, k: 0, link: 80, lv: 0.25, agit: 0.05, damp: 0.86 },
+    phases: [] },
+  // 10 — Primero "reemplazo" (los viejos se apagan, los jóvenes brillan); luego trabajan juntos
+  { base: { pull: 0, k: 0, link: 100, lv: 0.2, agit: 1.4, oldAg: 0.3, youngAg: 2.2, cpull: 0.0003,
+            oldA: 40, oldS: 9, youngA: 255, youngS: 9 },
+    phases: [{ at: 3.4, form: 'mentor', fx: 'mentor', R: 46, pull: 0.014, oldA: 235, oldS: 13,
+               youngA: 235, youngS: 7, agit: 0.35, youngAg: 1.2, lv: 0.5 }] },
+  // 11 — Rotación galáctica: viejos y jóvenes giran como un solo disco
+  { base: { ...UNITY, form: 'galaxy', pull: 0.02, k: 0, link: 70, lv: 0.18, agit: 0.1, damp: 0.9, cpull: 0 }, phases: [] },
+  // 12 — Se construye: el disco se ordena en una constelación (generaciones intercaladas)
+  { base: { ...UNITY, form: 'galaxy', pull: 0.02, k: 0, link: 70, lv: 0.18, agit: 0.1, damp: 0.9, cpull: 0 },
+    phases: [{ at: 1.2, form: 'lattice', pull: 0.03, link: 66, rest: 58, k: 0.03, lv: 1, agit: 0.05, damp: 0.86 }] },
+  // 13 — Larga exposición: estelas de estrellas girando
+  { base: { form: 'galaxy', fx: 'trailsAll', pull: 0.03, mix: 0.7, oldA: 170, youngA: 170, oldS: 7,
+            youngS: 6, link: 60, lv: 0, k: 0, agit: 0.02, oldAg: 1, youngAg: 1, damp: 0.9, cpull: 0 },
+    phases: [] }
 ];
 
 let currentScene = 0;
-let system;
-let slides;
-let progressTrack;
+let system, slides, progressTrack;
 
-const ACCENT = [217, 119, 66];
-const ACCENT_YOUNG = [244, 239, 230];
+/* ---------- escenario: zona libre de texto ---------- */
+function stage() {
+  const x0 = width < 820 ? width * 0.08 : width * 0.36, x1 = width - 56;
+  const y0 = 96, y1 = height - 96;
+  return { x0, x1, y0, y1, w: x1 - x0, h: y1 - y0, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 };
+}
+function triadPts(st) {
+  return [[st.cx, st.y0 + st.h * 0.2],
+          [st.cx - st.w * 0.27, st.y1 - st.h * 0.2],
+          [st.cx + st.w * 0.27, st.y1 - st.h * 0.2]];
+}
 
+/* ---------- formaciones: devuelven [x, y] objetivo o null (libre) ---------- */
+const FORMS = {
+  // butacas: viejos en cuadrícula; jóvenes dan vueltas afuera
+  grid(n, st, t) {
+    if (!n.young) {
+      const cols = 6, rows = Math.ceil(n.gn / cols);
+      const c = n.gi % cols, r = Math.floor(n.gi / cols);
+      const gw = Math.min(st.w * 0.8, 520), gh = Math.min(st.h * 0.62, 330);
+      return [st.cx - gw / 2 + gw * c / (cols - 1), st.cy - gh / 2 + gh * r / Math.max(rows - 1, 1)];
+    }
+    const a = n.u * TAU + t * 0.06;
+    return [st.cx + Math.cos(a) * st.w * 0.47, st.cy + Math.sin(a) * st.h * 0.46];
+  },
+  // la cuadrícula se parte en dos y los jóvenes cruzan por el centro
+  open(n, st, t, P) {
+    if (!n.young) {
+      const g = FORMS.grid(n, st, t);
+      const side = (n.gi % 6) < 3 ? -1 : 1;
+      return [g[0] + side * P.gap * st.w * 0.2, g[1]];
+    }
+    const u = Math.abs(((n.u + t * 0.05) % 2) - 1);
+    return [st.x0 + u * st.w, st.cy + Math.sin(u * TAU * 2 + n.seed * 6) * st.h * 0.12];
+  },
+  // tres núcleos
+  triad(n, st, t, P) {
+    const v = triadPts(st)[n.idx % 3];
+    const a = n.seed * TAU + t * (n.young ? 0.5 : -0.2);
+    const rad = P.R * (0.35 + 0.65 * n.seed2);
+    return [v[0] + Math.cos(a) * rad, v[1] + Math.sin(a) * rad];
+  },
+  // cada joven orbita a "su" mentor
+  mentor(n, st, t, P, sys) {
+    if (!n.young) return null;
+    const m = sys.olds[n.gi % sys.olds.length];
+    const a = n.gi * 2.399 + t * 0.5;
+    return [m.x + Math.cos(a) * P.R, m.y + Math.sin(a) * P.R];
+  },
+  // los viejos marcan un camino sinuoso; los jóvenes quedan libres
+  path(n, st) {
+    if (n.young) return null;
+    return [st.x0 + 30 + n.v * (st.w - 60), st.cy + Math.sin(n.v * TAU * 0.9 + 0.6) * st.h * 0.28];
+  },
+  // dos anillos alrededor de una misma visión
+  orbit(n, st, t) {
+    const m = Math.min(st.w, st.h);
+    const rad = (n.young ? m * 0.38 : m * 0.17) + (n.seed2 - 0.5) * 16;
+    const a = n.u * TAU + t * (n.young ? 0.38 : 0.2);
+    return [st.cx + Math.cos(a) * rad, st.cy + Math.sin(a) * rad * 0.9];
+  },
+  // disco espiral que rota como un solo cuerpo (unísono)
+  galaxy(n, st, t) {
+    const m = Math.min(st.w, st.h) * 0.46;
+    const rr = Math.sqrt(n.slot / N_NODES) * m * 0.95 + 14 + (n.seed2 - 0.5) * 18;
+    const a = (n.slot % 2) * Math.PI + rr * 0.011 + t * 0.18;
+    return [st.cx + Math.cos(a) * rr, st.cy + Math.sin(a) * rr * 0.72];
+  },
+  // entramado hexagonal con viejos y jóvenes intercalados
+  lattice(n, st) {
+    const cols = 10, rows = Math.ceil(N_NODES / cols);
+    const sp = Math.min(st.w * 0.86 / (cols - 1), st.h * 0.8 / (rows - 1), 58);
+    const c = n.slot % cols, r = Math.floor(n.slot / cols);
+    return [st.cx - sp * (cols - 1) / 2 + c * sp + (r % 2) * sp * 0.5, st.cy - sp * (rows - 1) / 2 + r * sp];
+  }
+};
+
+/* ---------- sistema ---------- */
+class ParticleSystem {
+  constructor() {
+    this.nodes = []; this.olds = []; this.youngs = [];
+    const st = stage();
+    for (let i = 0; i < N_NODES; i++) {
+      const n = new Node(i >= N_OLD, random(st.x0, st.x1), random(st.y0, st.y1));
+      n.idx = i;
+      this.nodes.push(n);
+      (n.young ? this.youngs : this.olds).push(n);
+    }
+    [this.olds, this.youngs].forEach(g => g.forEach((n, i) => {
+      n.gi = i; n.gn = g.length; n.u = i / g.length; n.v = i / Math.max(g.length - 1, 1);
+    }));
+    let oi = 0, yi = 0;   // posición intercalada para el entramado
+    for (let k = 0; k < N_NODES; k++) {
+      const takeOld = oi < this.olds.length &&
+        (yi >= this.youngs.length || oi / this.olds.length <= yi / this.youngs.length);
+      (takeOld ? this.olds[oi++] : this.youngs[yi++]).slot = k;
+    }
+    this.cur = { ...DEFAULTS };
+    this.pairs = []; this.pulses = []; this.rects = [];
+    this.dust = Array.from({ length: 130 }, () => ({ x: random(width), y: random(height), vx: random(-0.2, 0.2),
+      vy: random(-0.12, 0.12), s: random(1.5, 4), c: Math.floor(random(5)), tw: random(TAU) }));
+    this.fxA = 0; this.now = 0; this.lastPulse = -2.2;
+    this.t0 = millis(); this.scene = SCENES[0]; this.st = st;
+  }
+
+  readRects() {   // zonas ocupadas por el texto de la slide activa (línea por línea)
+    this.rects = [];
+    document.querySelectorAll('.slide.active [data-clave]').forEach(el => {
+      const rg = document.createRange(); rg.selectNodeContents(el);
+      for (const r of rg.getClientRects())
+        if (r.width > 4 && r.height > 4) this.rects.push({ l: r.left - 28, r: r.right + 28, t: r.top - 20, b: r.bottom + 20 });
+    });
+  }
+
+  nearText(x, y) {
+    let md = 1e9;
+    for (const r of this.rects) {
+      const d = Math.hypot(Math.max(r.l - x, 0, x - r.r), Math.max(r.t - y, 0, y - r.b));
+      if (d < md) { md = d; this.tcx = (r.l + r.r) / 2; this.tcy = (r.t + r.b) / 2; }
+    }
+    return md;
+  }
+
+  setScene(i) {
+    this.readRects();
+    this.scene = SCENES[i];
+    this.t0 = millis();
+    this.fxA = 0; this.pulses = []; this.lastPulse = -2.2;
+  }
+
+  target(now) {
+    const t = { ...DEFAULTS, ...this.scene.base };
+    for (const ph of this.scene.phases) if (ph.at <= now) Object.assign(t, ph);
+    return t;
+  }
+
+  update() {
+    const now = (millis() - this.t0) / 1000, st = stage();
+    this.now = now; this.st = st;
+    if (frameCount % 8 === 0) this.readRects();
+    const tg = this.target(now), P = this.cur;
+    for (const k of NUM_KEYS) P[k] += (tg[k] - P[k]) * 0.045;
+    P.form = tg.form; P.fx = tg.fx;
+    this.fxA += ((P.fx ? 1 : 0) - this.fxA) * 0.03;
+
+    // fuerzas individuales
+    const form = FORMS[P.form];
+    for (const n of this.nodes) {
+      const md = this.nearText(n.x, n.y);   // las partículas se apagan y se apartan del texto
+      n.vis += ((0.14 + 0.86 * sm(constrain(md / 120, 0, 1))) - n.vis) * 0.12;
+      if (md < 80) {
+        const ex = n.x - this.tcx, ey = n.y - this.tcy, el = Math.hypot(ex, ey) || 1, kk = 0.1 * (1 - md / 80);
+        n.accel(ex / el * kk, ey / el * kk);
+      }
+      const a = random(TAU), ag = P.agit * MOTION * (n.young ? P.youngAg : P.oldAg);
+      n.force(Math.cos(a) * ag, Math.sin(a) * ag);
+      n.force((st.cx - n.x) * P.cpull, (st.cy - n.y) * P.cpull);
+      if (P.flow > 0.001) {   // campo común: misma aceleración sin importar la masa → unísono
+        const fa = noise(n.x * 0.0022, n.y * 0.0022, now * 0.12) * TAU * 2;
+        n.accel(Math.cos(fa) * P.flow * MOTION, Math.sin(fa) * P.flow * MOTION);
+      }
+      if (form) {
+        const tp = form(n, st, now, P, this);
+        if (tp) n.accel((tp[0] - n.x) * P.pull, (tp[1] - n.y) * P.pull);
+      }
+    }
+
+    // resortes dinámicos entre vecinos
+    this.pairs.length = 0;
+    const L = P.link, L2 = L * L, N = this.nodes;
+    for (let i = 0; i < N.length; i++) {
+      for (let j = i + 1; j < N.length; j++) {
+        const a = N[i], b = N[j], dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy;
+        if (d2 < L2 && d2 > 0.01) {
+          const d = Math.sqrt(d2);
+          this.pairs.push([a, b, d]);
+          if (P.k > 0.0008) {
+            const f = (d - P.rest) * P.k / d;
+            a.force(dx * f, dy * f);
+            b.force(-dx * f, -dy * f);
+          }
+        }
+      }
+    }
+
+    // ondas de impacto
+    if (P.fx.includes('pulse') && !REDUCED && now - this.lastPulse > 2.6) {
+      this.pulses.push(now); this.lastPulse = now;
+    }
+    const maxR = Math.hypot(st.w, st.h);
+    this.pulses = this.pulses.filter(t0 => (now - t0) * 280 < maxR);
+    for (const t0 of this.pulses) {
+      const r = (now - t0) * 280;
+      for (const n of N) {
+        const dx = n.x - st.cx, dy = n.y - st.cy, d = Math.hypot(dx, dy);
+        if (d > 1 && Math.abs(d - r) < 32) { n.accel(dx / d * 0.35, dy / d * 0.35); n.flash = 1; }
+      }
+    }
+
+    for (const d of this.dust) {
+      d.x += d.vx * MOTION; d.y += d.vy * MOTION;
+      if (d.x < -20) d.x = width + 20; if (d.x > width + 20) d.x = -20;
+      if (d.y < -20) d.y = height + 20; if (d.y > height + 20) d.y = -20;
+    }
+    for (const n of N) n.step(P, st);
+  }
+
+  display() {
+    const P = this.cur, st = this.st, A = this.fxA, ctx = drawingContext;
+    ctx.globalCompositeOperation = 'lighter';
+    noFill();
+
+    if (P.fx.includes('path')) {            // el camino de la experiencia
+      stroke(famRGB.o[0], famRGB.o[1], famRGB.o[2], 85 * A); strokeWeight(1.2);
+      beginShape(); for (const n of this.olds) vertex(n.x, n.y); endShape();
+    }
+    if (P.fx.includes('triad')) {           // Academia · Industria · Ciudad
+      const V = triadPts(st);
+      stroke(CREAM[0], CREAM[1], CREAM[2], 55 * A); strokeWeight(1);
+      line(V[0][0], V[0][1], V[1][0], V[1][1]);
+      line(V[1][0], V[1][1], V[2][0], V[2][1]);
+      line(V[2][0], V[2][1], V[0][0], V[0][1]);
+      stroke(famRGB.o[0], famRGB.o[1], famRGB.o[2], 80 * A);
+      for (const v of V) circle(v[0], v[1], P.R * 2.6);
+    }
+    if (P.fx.includes('mentor')) {          // la confianza se ve como cercanía
+      const al = map(P.R, 150, 40, 18, 150, true) * A;
+      stroke(famRGB.o[0], famRGB.o[1], famRGB.o[2], al); strokeWeight(1);
+      for (const n of this.youngs) {
+        const m = this.olds[n.gi % this.olds.length];
+        line(m.x, m.y, n.x, n.y);
+      }
+    }
+    if (P.fx.includes('vision')) {          // un solo centro
+      const m = Math.min(st.w, st.h);
+      stroke(CREAM[0], CREAM[1], CREAM[2], 22 * A); strokeWeight(1);
+      ellipse(st.cx, st.cy, m * 0.34, m * 0.34 * 0.9);
+      ellipse(st.cx, st.cy, m * 0.76, m * 0.76 * 0.9);
+      noStroke();
+      for (let i = 0; i < 4; i++) { fill(famRGB.o[0], famRGB.o[1], famRGB.o[2], 14 * A); circle(st.cx, st.cy, 34 + i * 30); }
+      fill(EMBER[0], EMBER[1], EMBER[2], 240 * A); circle(st.cx, st.cy, 12);
+      ctx.globalAlpha = 0.85 * A; ctx.drawImage(SPR.ember, st.cx - 110, st.cy - 110, 220, 220); ctx.globalAlpha = 1;
+      noFill();
+    }
+    for (const t0 of this.pulses) {         // ondas de impacto
+      const r = (now_(this) - t0) * 280;
+      const pa = map(r, 0, Math.hypot(st.w, st.h), 170, 0, true);
+      strokeWeight(8); stroke(famRGB.o[0], famRGB.o[1], famRGB.o[2], pa * 0.2); circle(st.cx, st.cy, r * 2);
+      strokeWeight(1.6); stroke(255, 225, 190, pa); circle(st.cx, st.cy, r * 2);
+      if (r < 150) { ctx.globalAlpha = 1 - r / 150; ctx.drawImage(SPR.fam[famIdx].o[0], st.cx - 190, st.cy - 190, 380, 380); ctx.globalAlpha = 1; }
+    }
+
+    if (P.lv > 0.02) {                      // enlaces
+      for (const [a, b, d] of this.pairs) {
+        const k = map(d, 0, P.link, 1, 0) * P.lv * Math.min(a.vis, b.vis), w = map(d, 10, P.link, 1.5, 0.4, true);
+        strokeWeight(w * 4); stroke(famRGB.y[0], famRGB.y[1], famRGB.y[2], 26 * k); line(a.x, a.y, b.x, b.y);
+        strokeWeight(w); stroke(128 + famRGB.y[0] / 2, 128 + famRGB.y[1] / 2, 128 + famRGB.y[2] / 2, 150 * k); line(a.x, a.y, b.x, b.y);
+      }
+    }
+
+    const tt = millis() * 0.001;   // polvo estelar
+    for (const d of this.dust) {
+      const m = 0.12 + 0.88 * sm(constrain(this.nearText(d.x, d.y) / 120, 0, 1)), g = d.s * 6;
+      ctx.globalAlpha = (0.3 + 0.25 * Math.sin(tt * 1.3 + d.tw)) * m;
+      ctx.drawImage(SPR.fam[famIdx][d.c % 2 ? 'y' : 'o'][d.c], d.x - g / 2, d.y - g / 2, g, g);
+    }
+    ctx.globalAlpha = 1;
+    for (const n of this.nodes) n.drawTrail(P);   // estelas
+    for (const n of this.nodes) n.display(P, ctx);     // nodos
+    ctx.globalCompositeOperation = 'source-over';
+  }
+}
+function now_(sys) { return sys.now; }
+
+function nodeColor(n, m) {
+  const b = n.young ? famRGB.y : famRGB.o;
+  return [b[0] + (EMBER[0] - b[0]) * m, b[1] + (EMBER[1] - b[1]) * m, b[2] + (EMBER[2] - b[2]) * m];
+}
+
+/* ---------- nodo (números planos: más rápido que p5.Vector) ---------- */
+class Node {
+  constructor(young, x, y) {
+    this.young = young;
+    this.mass = young ? 1 : 3.5;
+    this.x = x; this.y = y; this.vx = 0; this.vy = 0; this.ax = 0; this.ay = 0;
+    this.seed = Math.random(); this.seed2 = Math.random();
+    this.alpha = young ? 70 : 210; this.size = young ? 5 : 13; this.flash = 0;
+    this.trail = [];
+    this.pal = Math.floor(Math.random() * 5); this.z = 0.8 + Math.random() * 0.5;
+    this.vis = 1; this.mask = 1;
+  }
+  force(fx, fy) { this.ax += fx / this.mass; this.ay += fy / this.mass; }
+  accel(ax, ay) { this.ax += ax; this.ay += ay; }
+  step(P, st) {
+    this.vx = (this.vx + this.ax) * P.damp; this.vy = (this.vy + this.ay) * P.damp;
+    this.x += this.vx; this.y += this.vy; this.ax = 0; this.ay = 0;
+    this.x = constrain(this.x, st.x0 - 40, st.x1 + 30);
+    this.y = constrain(this.y, 60, height - 60);
+    this.alpha += ((this.young ? P.youngA : P.oldA) - this.alpha) * 0.06;
+    this.size  += ((this.young ? P.youngS : P.oldS) - this.size) * 0.06;
+    this.flash *= 0.9;
+    const track = P.fx.includes('trailsAll') || (P.fx.includes('trails') && this.young);
+    if (track) { this.trail.push([this.x, this.y]); if (this.trail.length > TRAIL_MAX) this.trail.shift(); }
+    else if (this.trail.length) this.trail.shift();
+  }
+  drawTrail(P) {
+    const L = this.trail.length;
+    if (L < 2) return;
+    const c = nodeColor(this, P.mix), top = (this.young ? 130 : 80) * this.vis;
+    for (let i = 1; i < L; i++) {
+      stroke(c[0], c[1], c[2], (i / L) * top);
+      strokeWeight((this.young ? 0.6 : 0.5) + (i / L) * 2.2);
+      line(this.trail[i - 1][0], this.trail[i - 1][1], this.trail[i][0], this.trail[i][1]);
+    }
+  }
+  display(P, ctx) {
+    const tm = millis();
+    const al = constrain(this.alpha + this.flash * 70, 0, 255) / 255 * this.vis * (0.65 + 0.35 * this.z);
+    const s = (this.size + this.flash * 6) * this.z * (1 + 0.12 * Math.sin(tm * 0.003 + this.seed * 40));
+    const m = P.mix, x = this.x, y = this.y, sp = Math.hypot(this.vx, this.vy);
+    if (sp > 0.25) {   // cola de movimiento
+      ctx.globalAlpha = al * Math.min(0.65, sp * 0.2);
+      ctx.strokeStyle = famCSS[this.young ? 'y' : 'o'];
+      ctx.lineWidth = Math.max(1, s * 0.4); ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - this.vx * 8, y - this.vy * 8); ctx.stroke();
+    }
+    const gs = s * (this.young ? 6 : 7.5), pal = SPR.fam[famIdx][this.young ? 'y' : 'o'][this.pal];
+    ctx.globalAlpha = al * (1 - m); ctx.drawImage(pal, x - gs / 2, y - gs / 2, gs, gs);
+    if (m > 0.02) { ctx.globalAlpha = al * m; ctx.drawImage(SPR.ember, x - gs / 2, y - gs / 2, gs, gs); }
+    ctx.globalAlpha = al; const cs = s * 1.8;   // núcleo blanco-caliente
+    ctx.drawImage(SPR.white, x - cs / 2, y - cs / 2, cs, cs);
+    if (!this.young) {
+      if (al > 0.3) {   // destellos de difracción
+        ctx.globalAlpha = al * 0.4; ctx.strokeStyle = famCSS.o; ctx.lineWidth = 0.8;
+        const L = s * 2.8;
+        ctx.beginPath(); ctx.moveTo(x - L, y); ctx.lineTo(x + L, y); ctx.moveTo(x, y - L); ctx.lineTo(x, y + L); ctx.stroke();
+      }
+      if (s > 11) {     // halo anular
+        ctx.globalAlpha = al * 0.16; ctx.strokeStyle = famCSS.o; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(x, y, s * 1.5, 0, TAU); ctx.stroke();
+      }
+      for (let k = 0; k < 3; k++) {   // planetas diminutos en órbita
+        const a = this.seed * TAU + tm * 0.001 * (0.9 + k * 0.5) * (k % 2 ? -1 : 1), r = s * (1.9 + k * 0.75);
+        ctx.globalAlpha = al * 0.75;
+        ctx.drawImage(SPR.white, x + Math.cos(a) * r - 2.5, y + Math.sin(a) * r * 0.8 - 2.5, 5, 5);
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+}
+
+/* ============ FONDO ESPACIAL ============ */
+let vig, nebSmall, nebDirty = 200, bandPts = [], TH = null, stars = [], shooters = [], camX = 0, SPR = {};
+let famIdx = 0, famRGB = { o: [255, 120, 60], y: [120, 190, 255] }, famCSS = { o: 'rgb(255,120,60)', y: 'rgb(120,190,255)' };
+// 8 familias de color (viejos / jóvenes) y un tema de fondo por diapositiva
+const FAMS = [
+  { o: ['255,120,60', '255,160,70', '255,190,100', '240,90,60', '255,215,150'], y: ['120,190,255', '150,230,255', '190,200,255', '210,160,255', '130,255,230'] },
+  { o: ['170,200,255', '200,225,255', '140,170,255', '220,235,255', '160,190,240'], y: ['255,170,90', '255,200,120', '255,140,80', '255,215,160', '255,120,70'] },
+  { o: ['255,210,90', '255,235,140', '255,190,60', '255,245,200', '250,220,110'], y: ['255,120,160', '255,160,190', '255,100,130', '255,190,210', '240,120,200'] },
+  { o: ['200,100,255', '230,130,255', '170,90,240', '255,150,230', '190,120,255'], y: ['100,255,230', '140,255,210', '90,230,255', '180,255,240', '120,240,200'] },
+  { o: ['255,70,70', '255,100,60', '230,50,70', '255,130,90', '255,90,110'], y: ['255,235,220', '255,250,240', '255,220,200', '255,255,255', '255,240,210'] },
+  { o: ['90,255,170', '140,255,120', '60,230,190', '190,255,150', '100,240,210'], y: ['255,120,220', '255,160,240', '230,100,200', '255,190,250', '255,140,180'] },
+  { o: ['255,130,160', '255,170,150', '255,110,130', '255,200,190', '240,120,170'], y: ['110,200,255', '140,230,255', '100,170,255', '170,240,255', '130,190,255'] },
+  { o: ['255,180,60', '255,140,50', '255,100,40', '255,210,120', '255,160,80'], y: ['200,120,255', '230,160,255', '160,100,255', '240,190,255', '180,140,255'] }
+];
+const THEMES = [
+  { f: 0, bg: [5, 4, 9],   n: ['255,120,60', '120,70,190', '40,120,200'],  ang: -0.45, ba: 0.07 },
+  { f: 1, bg: [2, 5, 14],  n: ['60,110,220', '40,70,160', '90,150,255'],   ang: 0.2,   ba: 0.03 },
+  { f: 2, bg: [9, 6, 3],   n: ['255,190,70', '255,120,60', '255,230,160'], ang: -0.9,  ba: 0.1 },
+  { f: 3, bg: [8, 3, 14],  n: ['200,80,255', '100,60,220', '255,100,200'], ang: 0.6,   ba: 0.08 },
+  { f: 4, bg: [13, 3, 4],  n: ['255,60,50', '255,150,60', '180,30,60'],    ang: -0.2,  ba: 0.05 },
+  { f: 5, bg: [2, 10, 10], n: ['40,230,170', '30,150,200', '120,255,120'], ang: 0.9,   ba: 0.09 },
+  { f: 6, bg: [11, 4, 8],  n: ['255,100,140', '160,70,190', '255,170,120'], ang: -0.6,  ba: 0.07 },
+  { f: 7, bg: [11, 5, 3],  n: ['255,150,60', '200,100,255', '60,90,200'],  ang: 1.2,   ba: 0.06 },
+  { f: 2, bg: [8, 5, 2],   n: ['255,200,90', '255,130,60', '90,70,160'],   ang: 0,     ba: 0.04 },
+  { f: 1, bg: [3, 4, 13],  n: ['150,120,255', '255,120,90', '60,110,220'], ang: -1.1,  ba: 0.06 },
+  { f: 3, bg: [7, 3, 13],  n: ['180,90,255', '90,60,200', '255,140,210'],  ang: 0.3,   ba: 0.13 },
+  { f: 1, bg: [2, 5, 13],  n: ['90,150,255', '150,120,255', '60,200,230'], ang: 0.7,   ba: 0.07 },
+  { f: 0, bg: [4, 3, 8],   n: ['255,140,70', '90,70,170', '30,60,120'],    ang: -0.3,  ba: 0.08 }
+];
+const lerpTo = (c, t, k) => { for (let i = 0; i < c.length; i++) { if (Array.isArray(c[i])) lerpTo(c[i], t[i], k); else c[i] += (t[i] - c[i]) * k; } };
+function themeTarget(i) {
+  const t = THEMES[i];
+  return { bg: t.bg.slice(), n: t.n.map(c => c.split(',').map(Number)), ang: t.ang, ba: t.ba,
+           p: [0, 1, 2].map(k => [0.5 + 0.4 * Math.cos(i * 2.1 + k * 2.1), 0.5 + 0.36 * Math.sin(i * 1.7 + k * 2.4)]) };
+}
+function setTheme(i) {   // cada diapositiva cambia paleta, nebulosa, acento y entrada del texto
+  famIdx = THEMES[i].f;
+  const o = FAMS[famIdx].o[0].split(',').map(Number), y = FAMS[famIdx].y[0].split(',').map(Number);
+  famRGB = { o, y }; famCSS = { o: `rgb(${o})`, y: `rgb(${y})` };
+  document.body.dataset.s = i + 1;
+  document.documentElement.style.setProperty('--accent', famCSS.o);
+  nebDirty = 160;
+}
+function paintNebula() {   // nebulosa viva a 1/4 de resolución
+  const c = nebSmall, x = c.getContext('2d'), W = c.width, H = c.height;
+  x.globalCompositeOperation = 'source-over';
+  x.fillStyle = `rgb(${TH.bg.map(Math.round)})`; x.fillRect(0, 0, W, H);
+  x.globalCompositeOperation = 'lighter';
+  const al = [0.24, 0.15, 0.17];
+  for (let k = 0; k < 3; k++) {
+    const px = TH.p[k][0] * W, py = TH.p[k][1] * H, r = Math.max(W, H) * (0.38 + 0.1 * k);
+    const g = x.createRadialGradient(px, py, 0, px, py, r), col = TH.n[k].map(Math.round).join(',');
+    g.addColorStop(0, `rgba(${col},${al[k]})`); g.addColorStop(1, `rgba(${col},0)`);
+    x.fillStyle = g; x.fillRect(0, 0, W, H);
+  }
+  x.save(); x.translate(W / 2, H / 2); x.rotate(TH.ang);   // Vía Láctea con otra inclinación en cada slide
+  const col = TH.n[2].map(Math.round).join(','), b = x.createLinearGradient(0, -H * 0.3, 0, H * 0.3);
+  b.addColorStop(0, `rgba(${col},0)`); b.addColorStop(0.5, `rgba(${col},${TH.ba})`); b.addColorStop(1, `rgba(${col},0)`);
+  x.fillStyle = b; x.fillRect(-W, -H * 0.3, W * 2, H * 0.6);
+  for (const [a, d, r] of bandPts) { x.fillStyle = `rgba(225,232,255,${r * TH.ba * 3})`; x.fillRect(a * W * 1.3, d * H * 0.22, 1, 1); }
+  x.restore();
+}
+const TINT = [[255, 255, 255], [190, 210, 255], [255, 225, 190], [170, 200, 255]];
+
+const sm = t => t * t * (3 - 2 * t);
+function makeSprite(rgb) {   // brillo suave pre-renderizado (se dibuja en modo aditivo)
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const x = c.getContext('2d'), g = x.createRadialGradient(64, 64, 0, 64, 64, 64);
+  g.addColorStop(0, 'rgba(255,255,255,1)');
+  g.addColorStop(0.12, `rgba(${rgb},0.95)`);
+  g.addColorStop(0.35, `rgba(${rgb},0.28)`);
+  g.addColorStop(1, `rgba(${rgb},0)`);
+  x.fillStyle = g; x.fillRect(0, 0, 128, 128);
+  return c;
+}
+
+function buildSpace() {
+  if (!SPR.old) {
+    SPR.old = makeSprite('255,150,80'); SPR.young = makeSprite('150,195,255');
+    SPR.ember = makeSprite('255,200,150'); SPR.white = makeSprite('230,235,255');
+    SPR.fam = FAMS.map(f => ({ o: f.o.map(c => makeSprite(c)), y: f.y.map(c => makeSprite(c)) }));
+  }
+  if (vig) vig.remove();
+  const H = height;
+  nebSmall = document.createElement('canvas');
+  nebSmall.width = Math.ceil(width * 1.3 / 4); nebSmall.height = Math.ceil(height / 4);
+  nebDirty = 200;
+  if (!bandPts.length) for (let i = 0; i < 900; i++) bandPts.push([Math.random() - 0.5, Math.random() + Math.random() + Math.random() - 1.5, Math.random()]);
+
+  vig = createGraphics(width, H); vig.pixelDensity(1);   // viñeta
+  const vc = vig.drawingContext, v = vc.createRadialGradient(width / 2, H / 2, Math.min(width, H) * 0.35, width / 2, H / 2, Math.max(width, H) * 0.7);
+  v.addColorStop(0, 'rgba(2,3,8,0)'); v.addColorStop(1, 'rgba(2,3,8,0.7)');
+  vc.fillStyle = v; vc.fillRect(0, 0, width, H);
+
+  if (!stars.length) for (let i = 0; i < 340; i++) {
+    const l = i % 4;   // 4 capas de profundidad
+    stars.push({ x: random(width), y: random(height), d: [0.12, 0.3, 0.55, 0.9][l], s: [0.9, 1.2, 1.7, 2.4][l],
+                 tw: random(TAU), c: TINT[Math.floor(random(4))], big: Math.random() < 0.05 });
+  }
+}
+
+function drawSpace() {
+  background(3, 4, 10);
+  const dCam = (currentScene * 260 - camX) * 0.03; camX += dCam;   // cada slide = un salto de cámara
+  if (nebDirty > 0) {
+    const g = themeTarget(currentScene);
+    if (!TH) TH = JSON.parse(JSON.stringify(g));
+    lerpTo(TH.bg, g.bg, 0.04); lerpTo(TH.n, g.n, 0.04); lerpTo(TH.p, g.p, 0.04);
+    TH.ang += (g.ang - TH.ang) * 0.04; TH.ba += (g.ba - TH.ba) * 0.04;
+    paintNebula(); nebDirty--;
+  }
+  drawingContext.drawImage(nebSmall, -(camX / (12 * 260)) * width * 0.3, 0, width * 1.3, height);
+  image(vig, 0, 0);
+  const ctx = drawingContext, t = millis() * 0.001;
+  ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+  for (const s of stars) {
+    const x = (((s.x - camX * s.d) % width) + width) % width;
+    const a = 0.35 + 0.35 * Math.sin(t * (0.8 + s.d * 1.5) + s.tw);
+    const streak = Math.min(260, Math.abs(dCam) * s.d * 5);
+    const nc = TH ? TH.n[0] : s.c, col = `rgba(${(s.c[0] * 0.7 + nc[0] * 0.3) | 0},${(s.c[1] * 0.7 + nc[1] * 0.3) | 0},${(s.c[2] * 0.7 + nc[2] * 0.3) | 0},`;
+    if (streak > 2) {   // viaje en el hiperespacio al cambiar de slide
+      ctx.strokeStyle = col + Math.min(0.9, a + 0.2) + ')'; ctx.lineWidth = s.s;
+      ctx.beginPath(); ctx.moveTo(x, s.y); ctx.lineTo(x + Math.sign(dCam) * streak, s.y); ctx.stroke();
+    } else {
+      ctx.fillStyle = col + a + ')'; ctx.beginPath(); ctx.arc(x, s.y, s.s * 0.6, 0, TAU); ctx.fill();
+    }
+    if (s.big) { ctx.globalAlpha = a * 0.9; ctx.drawImage(SPR.white, x - s.s * 7, s.y - s.s * 7, s.s * 14, s.s * 14); ctx.globalAlpha = 1; }
+  }
+  if (!REDUCED && Math.random() < 0.006 && shooters.length < 2)   // estrellas fugaces
+    shooters.push({ x: random(width * 0.3, width), y: random(height * 0.05, height * 0.5), vx: -random(9, 15), vy: random(3, 6), life: 1 });
+  for (const sh of shooters) {
+    sh.x += sh.vx; sh.y += sh.vy; sh.life -= 0.022;
+    const g = ctx.createLinearGradient(sh.x, sh.y, sh.x - sh.vx * 9, sh.y - sh.vy * 9);
+    g.addColorStop(0, `rgba(255,245,230,${Math.max(0, sh.life)})`); g.addColorStop(1, 'rgba(255,245,230,0)');
+    ctx.strokeStyle = g; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(sh.x, sh.y); ctx.lineTo(sh.x - sh.vx * 9, sh.y - sh.vy * 9); ctx.stroke();
+  }
+  shooters = shooters.filter(sh => sh.life > 0);
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+/* ============ P5: CICLO ============ */
 function setup() {
-  const contenedor = document.getElementById('canvas-container');
   const canvas = createCanvas(windowWidth, windowHeight);
-  canvas.parent(contenedor);
+  canvas.parent(document.getElementById('canvas-container'));
   pixelDensity(1);
+  buildSpace();
 
   slides = document.querySelectorAll('.slide');
   progressTrack = document.getElementById('progress-track');
-
-  // Crear los dots de progreso
   slides.forEach((_, i) => {
     const dot = document.createElement('span');
     dot.className = 'progress-dot' + (i === 0 ? ' activo' : '');
     progressTrack.appendChild(dot);
   });
 
-  system = new ParticleSystem(75);
+  system = new ParticleSystem();
   aplicarTextos('es');
   applyScene(0);
 }
 
 function draw() {
-  background(15, 15, 16, 255);
+  drawSpace();
   system.update();
   system.display();
 }
 
-class ParticleSystem {
-  constructor(count) {
-    this.nodes = [];
-    this.springs = [];
-    this.k = 0.1;
-    this.restLength = 100;
-    this.damping = 0.9;
-    this.agitation = 0.5;
-
-    for (let i = 0; i < count; i++) {
-      const isYoung = i > count * 0.55;
-      const mass = isYoung ? 1 : 3.5;
-      const pos = createVector(
-        random(width * 0.35, width * 0.95),
-        random(height * 0.15, height * 0.85)
-      );
-      this.nodes.push(new Node(pos.x, pos.y, mass, isYoung));
-    }
-    this.rebuildConnections();
-  }
-
-  setParams(p) {
-    this.k = p.rigidity;
-    this.restLength = p.restLength;
-    this.damping = p.damping;
-    this.agitation = p.agitation;
-  }
-
-  rebuildConnections() {
-    this.springs = [];
-    for (let i = 0; i < this.nodes.length; i++) {
-      for (let j = i + 1; j < this.nodes.length; j++) {
-        const d = dist(
-          this.nodes[i].pos.x, this.nodes[i].pos.y,
-          this.nodes[j].pos.x, this.nodes[j].pos.y
-        );
-        if (d < 170) this.springs.push(new Spring(this.nodes[i], this.nodes[j]));
-      }
-    }
-  }
-
-  update() {
-    for (const node of this.nodes) {
-      const rf = p5.Vector.random2D().mult(
-        this.agitation * (node.isYoung ? 1.8 : 0.4)
-      );
-      node.applyForce(rf);
-
-      const center = createVector(width * 0.72, height * 0.5);
-      const cf = p5.Vector.sub(center, node.pos).mult(0.00018);
-      node.applyForce(cf);
-    }
-    for (const spring of this.springs) spring.update(this.k, this.restLength);
-    for (const node of this.nodes) node.update(this.damping);
-  }
-
-  display() {
-    for (const spring of this.springs) spring.display();
-    for (const node of this.nodes) node.display();
-  }
-}
-
-class Node {
-  constructor(x, y, mass, isYoung) {
-    this.pos = createVector(x, y);
-    this.vel = createVector(0, 0);
-    this.acc = createVector(0, 0);
-    this.mass = mass;
-    this.isYoung = isYoung;
-  }
-  applyForce(force) {
-    const f = p5.Vector.div(force, this.mass);
-    this.acc.add(f);
-  }
-  update(damping) {
-    this.vel.add(this.acc);
-    this.vel.mult(damping);
-    this.pos.add(this.vel);
-    this.acc.mult(0);
-    this.pos.x = constrain(this.pos.x, width * 0.32, width - 40);
-    this.pos.y = constrain(this.pos.y, 50, height - 50);
-  }
-  display() {
-    noStroke();
-    if (this.isYoung) {
-      fill(ACCENT_YOUNG[0], ACCENT_YOUNG[1], ACCENT_YOUNG[2], 190);
-      ellipse(this.pos.x, this.pos.y, 6, 6);
-    } else {
-      fill(ACCENT[0], ACCENT[1], ACCENT[2], 210);
-      ellipse(this.pos.x, this.pos.y, 13, 13);
-    }
-  }
-}
-
-class Spring {
-  constructor(nodeA, nodeB) { this.a = nodeA; this.b = nodeB; }
-  update(k, restLength) {
-    const force = p5.Vector.sub(this.b.pos, this.a.pos);
-    const d = force.mag();
-    const delta = d - restLength;
-    force.normalize();
-    force.mult(k * delta);
-    this.a.applyForce(force);
-    this.b.applyForce(force.mult(-1));
-  }
-  display() {
-    const d = p5.Vector.dist(this.a.pos, this.b.pos);
-    const alpha = map(d, 20, 220, 130, 8, true);
-    strokeWeight(map(d, 20, 180, 1.4, 0.35, true));
-    stroke(244, 239, 230, alpha);
-    line(this.a.pos.x, this.a.pos.y, this.b.pos.x, this.b.pos.y);
-  }
-}
-
 /* ============ NAVEGACIÓN ============ */
 function applyScene(index) {
-  slides.forEach((slide, i) => {
-    slide.classList.toggle('active', i === index);
-  });
-
-  // Dots de progreso
-  const dots = progressTrack.querySelectorAll('.progress-dot');
-  dots.forEach((d, i) => d.classList.toggle('activo', i <= index));
-
-  // Parámetros físicos
-  const sceneAttr = slides[index].getAttribute('data-scene');
-  const sceneIndex = sceneAttr ? parseInt(sceneAttr, 10) : 0;
-  if (system) {
-    system.setParams(SCENE_PARAMS[sceneIndex]);
-    system.rebuildConnections();
-  }
+  slides.forEach((slide, i) => slide.classList.toggle('active', i === index));
+  progressTrack.querySelectorAll('.progress-dot')
+    .forEach((d, i) => d.classList.toggle('activo', i <= index));
+  setTheme(index);
+  if (system) system.setScene(index);   // una escena de partículas por diapositiva
+  const hud = document.getElementById('hud');
+  hud.dataset.clave = 'hud_' + String(index + 1).padStart(2, '0');
+  aplicarTextos(idiomaActual);
 }
 
-function nextSlide() {
-  currentScene = (currentScene + 1) % slides.length;
-  applyScene(currentScene);
-}
-function prevSlide() {
-  currentScene = (currentScene - 1 + slides.length) % slides.length;
-  applyScene(currentScene);
-}
+function nextSlide() { currentScene = (currentScene + 1) % slides.length; applyScene(currentScene); }
+function prevSlide() { currentScene = (currentScene - 1 + slides.length) % slides.length; applyScene(currentScene); }
 
 function keyPressed() {
   if (keyCode === RIGHT_ARROW || keyCode === 32) { nextSlide(); return false; }
   if (keyCode === LEFT_ARROW) { prevSlide(); return false; }
   if (key === 'f' || key === 'F') fullscreen(!fullscreen());
 }
-function mousePressed() { nextSlide(); }
-function windowResized() { resizeCanvas(windowWidth, windowHeight); }
+
+// Clic = siguiente, pero no cuando se toca el selector de idioma
+document.addEventListener('click', e => {
+  if (e.target.closest('.selector-idioma')) return;
+  nextSlide();
+});
+
+// Deslizar en pantallas táctiles (un toque simple lo maneja el clic)
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].screenX - touchStartX;
+  if (dx < -50) nextSlide();
+  else if (dx > 50) prevSlide();
+}, { passive: true });
+
+function windowResized() { resizeCanvas(windowWidth, windowHeight); buildSpace(); }
+
 </script>
 </body>
 </html>
