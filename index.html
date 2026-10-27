@@ -1155,7 +1155,7 @@ function drawSpace() {
       p.a += ((p.idx === currentScene ? 1 : 0) - p.a) * 0.05;
       if (p.a < 0.01 || !p.card || !p.rect) continue;
       const ds = 0.94 + 0.06 * p.a, w = p.cw * ds, h = p.ch * ds;
-      c.globalAlpha = p.a * 0.85;
+      c.globalAlpha = p.a * 0.95;
       c.drawImage(p.card, p.rect.left + (p.cw - w) / 2, p.rect.top + (p.ch - h) / 2 + Math.sin(tp * 0.6 + p.idx) * 5, w, h);
     }
     c.globalAlpha = 1; c.globalCompositeOperation = 'source-over'; }
@@ -1195,18 +1195,30 @@ function renderCard(p, w, h) {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   const x = c.getContext('2d'), im = p.img;
   const k = Math.max(w / im.naturalWidth, h / im.naturalHeight), iw = im.naturalWidth * k, ih = im.naturalHeight * k;
+  let gain = 2.2;   // auto-niveles: las fotos de eventos suelen ser oscuras y se perdían en el cielo
+  try {
+    const q = document.createElement('canvas'); q.width = q.height = 16;
+    const qc = q.getContext('2d'); qc.drawImage(im, 0, 0, 16, 16);
+    const d = qc.getImageData(0, 0, 16, 16).data; let L = 0;
+    for (let i = 0; i < d.length; i += 4) L += (d[i] * 0.3 + d[i + 1] * 0.59 + d[i + 2] * 0.11) / 255;
+    gain = Math.min(3.4, Math.max(1.1, 0.5 / (L / 256 + 0.001)));
+  } catch (e) { /* file:// bloquea leer píxeles: se usa una ganancia fija */ }
+  const hasF = 'filter' in x;
+  if (hasF) x.filter = `grayscale(1) brightness(${gain.toFixed(2)}) contrast(1.15)`;
   x.drawImage(im, (w - iw) / 2, (h - ih) / 2, iw, ih);
+  x.filter = 'none';
+  if (!hasF) for (let i = 0; i < Math.round(gain) - 1; i++) { x.globalCompositeOperation = 'lighter'; x.drawImage(c, 0, 0); }
   const t = FAMS[THEMES[Math.max(p.idx, 0)].f].o[0].split(',').map(Number);
   x.globalCompositeOperation = 'saturation'; x.fillStyle = 'hsl(0,0%,50%)'; x.fillRect(0, 0, w, h);
   x.globalCompositeOperation = 'multiply';
-  x.fillStyle = `rgb(${t.map(v => Math.round(v * 0.6 + 102))})`; x.fillRect(0, 0, w, h);
+  x.fillStyle = `rgb(${t.map(v => Math.round(v * 0.5 + 128))})`; x.fillRect(0, 0, w, h);
   x.globalCompositeOperation = 'destination-in';   // bordes que se disuelven en el cielo
   x.save(); x.translate(w / 2, h / 2); x.scale(w / h, 1);
   const g = x.createRadialGradient(0, 0, 0, 0, 0, h / 2);
-  g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(0.5, 'rgba(0,0,0,0.95)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(0.62, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
   x.fillStyle = g; x.fillRect(-h, -h / 2, h * 2, h); x.restore();
   x.globalCompositeOperation = 'source-over';   // aro fino de luz
-  x.strokeStyle = `rgba(${t},0.3)`; x.lineWidth = 1;
+  x.strokeStyle = `rgba(${t},0.55)`; x.lineWidth = 1.5;
   x.beginPath(); x.ellipse(w / 2, h / 2, w / 2 - 2, h / 2 - 2, 0, 0, TAU); x.stroke();
   return c;
 }
@@ -1224,7 +1236,7 @@ function loadPhotos() {   // busca en img/ y, si no está, junto al index.html
     const src = el.getAttribute('src'), tries = [src, src.replace(/^img\//, '')];
     const next = () => {
       const u = tries.shift();
-      if (!u) { box.classList.add('vacia'); return; }
+      if (!u) { console.warn('No se encontró la foto:', src); box.classList.add('vacia'); return; }
       const im = new Image();
       im.onload = () => { p.img = im; box.style.setProperty('--ar', (im.naturalWidth / im.naturalHeight).toFixed(3)); photos.push(p); };
       im.onerror = next; im.src = u;
